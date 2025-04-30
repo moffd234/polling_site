@@ -6,21 +6,24 @@
     <h3>Poll: Parkway Superlatives</h3>
     <form method="POST" action="{{ url_for('vote') }}">
         {% for option in poll_data %}
-            <div class="mb-3">
-                <label>
-                    <input type="radio" name="option" value="{{ option.id }}" required>
-                    {{ option.name }}
-                </label>
-                <span class="pull-right">{{ option.percent }}%</span>
-                <div class="progress progress-striped active">
-                    <div class="bar" style="width: {{ option.percent }}%;">{{ option.percent }}%</div>
-                </div>
+        <div class="mb-3">
+            <label>
+                <input type="radio" name="option" value="{{ option.id }}" required>
+                {{ option.name }}
+            </label>
+            <span class="pull-right">{{ option.percent }}%</span>
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: {{ option.percent }}%;">{{ option.percent }}%</div>
             </div>
+        </div>
         {% endfor %}
+
+        {% if voted == False %}
         <div class="d-flex justify-content-between mt-4">
             <button type="submit" class="btn btn-success btn-large">Vote</button>
             <a href="#" class="btn btn-link">View detailed results</a>
         </div>
+        {% endif %}
     </form>
 </div>
 {% endblock %}
