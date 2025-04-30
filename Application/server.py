@@ -1,74 +1,126 @@
-from flask import Flask, render_template, redirect, url_for, request
-from flask_bootstrap import Bootstrap5
+import os
+
+from flask import Flask, render_template, request, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import find_dotenv, load_dotenv
+from os import getenv
+
+dotenv_path = find_dotenv()
+load_dotenv(dotenv_path)
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///poll.db'
+db_path = os.path.join(app.instance_path, 'poll.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = getenv('FLASK_SECRET_KEY')
 
-Bootstrap5(app)
 db = SQLAlchemy(app)
 
 member_names = [
-        "Janaija Norton",
-        "Japheth Cofield (Jay Cofield)",
-        "Jessica Witt",
-        "Joshua Morris",
-        "Mr. Cofield",
-        "Cherryann Brathwaite",
-        "Ms. Black (Mrs. Rollins)",
-        "Shakerria Dorsey",
-        "Shayne Carey",
-        "Tatyana Adei Flowers",
-        "Stewart Carey",
-        "A. Green",
-        "Alex Aviles",
-        "B. Benson",
-        "Chelsey Hughes",
-        "Ciara Gonzalez",
-        "Dominique D",
-        "Dr. Dawne",
-        "Dr. Moriel McDuffy",
-        "Taylor Butler",
-        "Toya Miller",
-        "Yusuf Aminah",
-        "Katlyn Witt",
-        "Maury Moody"
-    ]
+    "Janaija Norton",
+    "Japheth Cofield (Jay Cofield)",
+    "Jessica Witt",
+    "Joshua Morris",
+    "Mr. Cofield",
+    "Cherryann Brathwaite",
+    "Ms. Black (Mrs. Rollins)",
+    "Shakerria Dorsey",
+    "Shayne Carey",
+    "Tatyana Adei Flowers",
+    "Stewart Carey",
+    "A. Green",
+    "Alex Aviles",
+    "B. Benson",
+    "Chelsey Hughes",
+    "Ciara Gonzalez",
+    "Dominique D",
+    "Dr. Dawne",
+    "Dr. Moriel McDuffy",
+    "Taylor Butler",
+    "Toya Miller",
+    "Yusuf Aminah",
+    "Katlyn Witt",
+    "Maury Moody"
+]
+
+
+class Poll(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(200), nullable=False)
+    options = db.relationship('PollOption', backref='poll', lazy=True)
 
 
 class PollOption(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     votes = db.Column(db.Integer, default=0)
+    poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
+
 
 @app.route('/')
 def index():
-    voted = request.args.get('voted') == 'True'
-    poll_data = PollOption.query.all()
-    total_votes = sum(option.votes for option in poll_data) or 1  # Avoid divide by zero
-    # Calculate percentages
-    for option in poll_data:
-        option.percent = round((option.votes / total_votes) * 100)
-    return render_template("poll.html", poll_data=poll_data, voted=voted)
+    voted_polls = session.get('voted_polls', [])
+    all_polls = Poll.query.all()
 
-@app.route('/vote', methods=['POST'])
-def vote():
+    for poll in all_polls:
+        total_votes = sum(option.votes for option in poll.options) or 1
+        for option in poll.options:
+            option.percent = round((option.votes / total_votes) * 100)
+
+    return render_template("poll.html", polls=all_polls, voted_polls=voted_polls)
+
+
+@app.route('/vote/<int:poll_id>', methods=['POST'])
+def vote(poll_id):
     option_id = request.form.get('option')
-    option = PollOption.query.get(option_id)
-    if option:
+    option = db.session.get(PollOption, option_id)
+
+    if option and option.poll_id == poll_id:
         option.votes += 1
         db.session.commit()
-    return redirect(url_for('index',  voted=True))
+
+        voted_polls = session.get('voted_polls', [])
+        voted_polls.append(poll_id)
+        session['voted_polls'] = voted_polls
+
+        # Return updated poll data as JSON
+        total_votes = sum(o.votes for o in option.poll.options) or 1
+        poll_data = [{
+            'id': o.id,
+            'name': o.name,
+            'votes': o.votes,
+            'percent': round(o.votes / total_votes * 100)
+        } for o in option.poll.options]
+
+        return jsonify({'poll_id': poll_id, 'options': poll_data})
+
+    return jsonify({'error': 'Invalid vote'}), 400
+
+
+def create_poll(question: str, options: list[str]):
+    poll = Poll(question=question)
+    db.session.add(poll)
+    db.session.flush()
+    poll_options = [PollOption(name=option, poll_id=poll.id) for option in options]
+    db.session.add_all(poll_options)
 
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        if not PollOption.query.first():
-            for option in member_names:
-                db.session.add(PollOption(name=option))
+        if not Poll.query.first():
+            questions = [
+                "Most Inspirational?", "Best Mentor?", "Most Supportive", "Most Creative Lesson Plans", "Most Patient",
+                "Most Innovative", "Most Dedicated", "Most Organized", "Most Positive Attitude",
+                "Most Student Centered", "The Early Bird", "Coffee's Best Friend", "The Office Clown",
+                "The Chit Chat Award", "The Busy Bee", "The Food Order Master", "The Super Snacker",
+                "The Walking Toolbox", "Thinks In Emoji", "Peace Maker", "Five More Minutes", "Always In A Meeting",
+                "The Fire Extinguisher"
+            ]
+
+            for q in questions:
+                create_poll(q, member_names)
+
             db.session.commit()
 
     app.run(debug=True)
-
