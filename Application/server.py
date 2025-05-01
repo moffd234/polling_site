@@ -8,7 +8,7 @@ from os import getenv
 dotenv_path = find_dotenv()
 load_dotenv(dotenv_path)
 
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
 db_path = os.path.join(app.instance_path, 'poll.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
