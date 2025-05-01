@@ -52,22 +52,14 @@
             })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.options) {
+                    if (data.message) {
                         const container = this.closest(".card-body");
-                        const question = container.querySelector(".card-title").innerText;
-
-                        let html = `<h4 class="card-title">${question}</h4><ul class="list-group mt-3">`;
-                        data.options.forEach(option => {
-                            html += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            ${option.name}
-                            <span class="badge bg-primary rounded-pill">
-                                ${option.votes} vote${option.votes !== 1 ? 's' : ''} (${option.percent}%)
-                            </span>
-                        </li>`;
-                        });
-                        html += '</ul>';
-                        container.innerHTML = html;
+                        container.innerHTML = `
+                            <h4 class="card-title">Thank you for voting!</h4>
+                            <p>Your vote has been recorded successfully.</p>
+                        `;
+                    } else if (data.error) {
+                        alert(data.error);
                     }
                 })
                 .catch(err => console.error("Voting failed:", err));

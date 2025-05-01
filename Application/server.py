@@ -83,16 +83,7 @@ def vote(poll_id):
         voted_polls.append(poll_id)
         session['voted_polls'] = voted_polls
 
-        # Return updated poll data as JSON
-        total_votes = sum(o.votes for o in option.poll.options) or 1
-        poll_data = [{
-            'id': o.id,
-            'name': o.name,
-            'votes': o.votes,
-            'percent': round(o.votes / total_votes * 100)
-        } for o in option.poll.options]
-
-        return jsonify({'poll_id': poll_id, 'options': poll_data})
+        return jsonify({'message': 'Vote recorded successfully.'})
 
     return jsonify({'error': 'Invalid vote'}), 400
 
