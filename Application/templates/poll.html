@@ -2,68 +2,63 @@
 {% block title %}Parkway Academy Poll{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    {% for poll in polls %}
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">{{ poll.question }}</h4>
+    <div class="container mt-5">
+        {% for poll in polls %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">{{ poll.question }}</h4>
 
-            {% if poll.id in voted_polls %}
-            <ul class="list-group mt-3">
-                {% for option in poll.options %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ option.name }}
-                    <span class="badge bg-primary rounded-pill">
-                            {{ option.votes }} vote{{ 's' if option.votes != 1 else '' }} ({{ option.percent }}%)
-                        </span>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <form method="POST" action="{{ url_for('vote', poll_id=poll.id) }}" class="poll-form mt-3"
-                  data-poll-id="{{ poll.id }}">
-                {% for option in poll.options %}
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}"
-                           value="{{ option.id }}" required>
-                    <label class="form-check-label" for="option{{ option.id }}">
-                        {{ option.name }}
-                    </label>
+                    {% if poll.id in voted_polls %}
+                        <!-- Hide results -->
+                        <p class="text-muted">Thanks for voting!</p>
+                    {% else %}
+                        <!-- Show form as usual -->
+                        <form method="POST" action="{{ url_for('vote', poll_id=poll.id) }}" class="poll-form mt-3"
+                              data-poll-id="{{ poll.id }}">
+                            {% for option in poll.options %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="option"
+                                           id="option{{ option.id }}"
+                                           value="{{ option.id }}" required>
+                                    <label class="form-check-label" for="option{{ option.id }}">
+                                        {{ option.name }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-success mt-3">Vote</button>
+                        </form>
+                    {% endif %}
+
                 </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-success mt-3">Vote</button>
-            </form>
-            {% endif %}
-        </div>
+            </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-<script>
-    document.querySelectorAll("form.poll-form").forEach(form => {
-        form.addEventListener("submit", function (event) {
-            event.preventDefault(); // Prevent full-page reload
+    <script>
+        document.querySelectorAll("form.poll-form").forEach(form => {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent full-page reload
 
-            const pollId = this.dataset.pollId;
-            const formData = new FormData(this);
+                const pollId = this.dataset.pollId;
+                const formData = new FormData(this);
 
-            fetch(`/vote/${pollId}`, {
-                method: "POST",
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.message) {
-                        const container = this.closest(".card-body");
-                        container.innerHTML = `
+                fetch(`/vote/${pollId}`, {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message) {
+                            const container = this.closest(".card-body");
+                            container.innerHTML = `
                             <h4 class="card-title">Thank you for voting!</h4>
                             <p>Your vote has been recorded successfully.</p>
                         `;
-                    } else if (data.error) {
-                        alert(data.error);
-                    }
-                })
-                .catch(err => console.error("Voting failed:", err));
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(err => console.error("Voting failed:", err));
+            });
         });
-    });
-</script>
+    </script>
 {% endblock %}
