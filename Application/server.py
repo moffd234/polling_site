@@ -66,6 +66,19 @@ def vote(poll_id):
 
     return jsonify({'error': 'Invalid vote'}), 400
 
+@app.route("/debug/polls")
+def debug_polls():
+    polls = Poll.query.all()
+    data = []
+    for poll in polls:
+        data.append({
+            "question": poll.question,
+            "options": [
+                {"name": o.name, "votes": o.votes}
+                for o in poll.options
+            ]
+        })
+    return jsonify(data)
 
 def create_poll(question: str, options: list[str]):
     poll = Poll(question=question)
