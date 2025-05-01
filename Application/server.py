@@ -16,32 +16,11 @@ app.secret_key = getenv('FLASK_SECRET_KEY')
 
 db = SQLAlchemy(app)
 
-member_names = [
-    "Janaija Norton",
-    "Japheth Cofield (Jay Cofield)",
-    "Jessica Witt",
-    "Joshua Morris",
-    "Mr. Cofield",
-    "Cherryann Brathwaite",
-    "Ms. Black (Mrs. Rollins)",
-    "Shakerria Dorsey",
-    "Shayne Carey",
-    "Tatyana Adei Flowers",
-    "Stewart Carey",
-    "A. Green",
-    "Alex Aviles",
-    "B. Benson",
-    "Chelsey Hughes",
-    "Ciara Gonzalez",
-    "Dominique D",
-    "Dr. Dawne",
-    "Dr. Moriel McDuffy",
-    "Taylor Butler",
-    "Toya Miller",
-    "Yusuf Aminah",
-    "Katlyn Witt",
-    "Maury Moody"
-]
+member_names = ["Janaija Norton", "Jessica Witt", "Joshua Morris", "Mr. Cofield", "Mrs. B", "Shakerria Dorsey",
+                "Shayne Carey", "Tatyana Adei Flowers", "Stewart Carey", "Austin Green", "Alex Aviles",
+                "Benson", "Ciara Gonzalez", "Dominique", "Dr. Washington", "Toya Miller", "Yusuf Aminah",
+                "Katlyn Witt", "Maury Moody"
+                ]
 
 
 class Poll(db.Model):
