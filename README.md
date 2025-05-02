@@ -6,6 +6,13 @@ This is a Flask-based polling web application created for my significant other w
 
 ---
 
+## 🌍 Live Site
+
+You can access the deployed application here:  
+🔗 [https://polling-site-43ty.onrender.com/](https://polling-site-43ty.onrender.com/)
+
+---
+
 ## 📋 Features
 
 - ✅ Multiple dynamic poll questions and options  
