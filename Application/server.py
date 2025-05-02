@@ -16,11 +16,10 @@ app.secret_key = getenv('FLASK_SECRET_KEY')
 
 db = SQLAlchemy(app)
 
-member_names = ["Janaija Norton", "Jessica Witt", "Joshua Morris", "Mr. Cofield", "Mrs. B", "Shakerria Dorsey",
-                "Shayne Carey", "Tatyana Adei Flowers", "Stewart Carey", "Austin Green", "Alex Aviles",
-                "Benson", "Ciara Gonzalez", "Dominique", "Dr. Washington", "Toya Miller", "Yusuf Aminah",
-                "Katlyn Witt", "Maury Moody"
-                ]
+member_names = ["Person 1", "Person 2", "Person 3", "Person 4", "Person 5",
+                "Person 6", "Person 7", "Person 8", "Person 9", "Person 10",
+                "Person 11", "Person 12", "Person 13", "Person 14", "Person 15",
+                "Person 16", "Person 17", "Person 18", "Person 19"]
 
 
 class Poll(db.Model):
@@ -66,6 +65,7 @@ def vote(poll_id):
 
     return jsonify({'error': 'Invalid vote'}), 400
 
+
 @app.route("/debug/polls")
 def debug_polls():
     polls = Poll.query.all()
@@ -79,6 +79,7 @@ def debug_polls():
             ]
         })
     return jsonify(data)
+
 
 def create_poll(question: str, options: list[str]):
     poll = Poll(question=question)
